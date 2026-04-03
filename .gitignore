@@ -15,8 +15,9 @@ env/
 # Environment / secrets
 .env
 
-# Generated reports
-*.html
+# Generated reports (exclude generated HTML, but track templates)
+htmlcov/*.html
+coverage.html
 
 # IDE
 .idea/

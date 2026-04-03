@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Reliability Digest - {{ a.week_start }} to {{ a.week_end }}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#232525;line-height:1.5;">
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f5;">
+<tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="640" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #dddddd;">
+
+{# ── HEADER ──────────────────────────────────────────────── #}
+<tr>
+<td style="background-color:#232525;padding:24px 32px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+  <tr>
+    <td>
+      <div style="font-size:20px;font-weight:700;color:#ffffff;letter-spacing:-0.3px;">Weekly Reliability Digest</div>
+      <div style="font-size:13px;color:#999999;margin-top:4px;">{{ a.week_start }} - {{ a.week_end }} &nbsp;|&nbsp; PagerDuty Analytics</div>
+    </td>
+    <td align="right" valign="top">
+      {% if a.kpis|length > 3 %}
+      <div style="background-color:#F96302;color:#ffffff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:12px;display:inline-block;">{{ a.kpis[3].value }} UPTIME</div>
+      {% endif %}
+    </td>
+  </tr>
+  </table>
+</td>
+</tr>
+<tr><td style="background-color:#F96302;height:4px;font-size:0;line-height:0;">&nbsp;</td></tr>
+
+{# ── SECTION 1: EXECUTIVE SNAPSHOT ───────────────────────── #}
+<tr>
+<td style="padding:28px 32px 0 32px;">
+  <div style="font-size:11px;font-weight:700;color:#F96302;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:16px;">Executive snapshot</div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+  <tr>
+    {% for kpi in a.kpis %}
+    <td width="{{ (100 / a.kpis|length)|int }}%" valign="top" {% if not loop.last %}style="padding-right:8px;"{% endif %}>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f5;border:1px solid #dddddd;border-top:3px solid #F96302;border-radius:0 0 6px 6px;">
+      <tr><td style="padding:14px 12px;">
+        <div style="font-size:10px;font-weight:600;color:#5b5e5e;text-transform:uppercase;letter-spacing:0.4px;">{{ kpi.label }}</div>
+        <div style="font-size:26px;font-weight:800;color:#232525;line-height:1.1;margin-top:2px;">{{ kpi.value }}</div>
+        {% if kpi.change_pct is not none %}
+        <div style="font-size:11px;margin-top:2px;">
+          <span style="color:{{ kpi|kpi_change_color }};font-weight:600;">{{ kpi|kpi_arrow }} {{ kpi.change_pct|abs }}%</span>
+          <span style="color:#999999;"> {{ kpi.subtitle }}</span>
+        </div>
+        {% endif %}
+      </td></tr>
+      </table>
+    </td>
+    {% endfor %}
+  </tr>
+  </table>
+
+  {# 4-week trend table #}
+  {% if a.weekly_trend %}
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;background-color:#f5f5f5;border:1px solid #dddddd;border-radius:6px;">
+  <tr><td style="padding:14px 16px;">
+    <div style="font-size:11px;font-weight:600;color:#232525;margin-bottom:8px;">4-week trend</div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:12px;color:#232525;">
+    <tr style="color:#999999;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;">
+      <td style="padding:0 0 6px 0;">Week</td>
+      <td align="center" style="padding:0 0 6px 0;">Incidents</td>
+      <td align="center" style="padding:0 0 6px 0;">MTTR p50</td>
+      <td align="center" style="padding:0 0 6px 0;">MTTA p50</td>
+      <td align="center" style="padding:0 0 6px 0;">Sleep int.</td>
+    </tr>
+    {% for w in a.weekly_trend %}
+    <tr {% if loop.last %}style="font-weight:600;color:#232525;"{% endif %}>
+      <td style="padding:5px 0;{% if loop.last %}color:#F96302;{% else %}color:#999999;{% endif %}">{{ w.range_start[:10] }}{% if loop.last %} &larr;{% endif %}</td>
+      <td align="center" style="padding:5px 0;">{{ w.incidents }}</td>
+      <td align="center" style="padding:5px 0;">{{ w.mttr_p50_formatted }}</td>
+      <td align="center" style="padding:5px 0;">{{ w.mtta_p50_formatted }}</td>
+      <td align="center" style="padding:5px 0;">{{ w.sleep_interruptions }}</td>
+    </tr>
+    {% endfor %}
+    </table>
+  </td></tr>
+  </table>
+  {% endif %}
+
+  {# AI-generated executive summary #}
+  {% if insights.executive_summary %}
+  <div style="margin-top:14px;font-size:13px;color:#5b5e5e;line-height:1.6;">{{ insights.executive_summary }}</div>
+  {% endif %}
+</td>
+</tr>
+
+<tr><td style="padding:20px 32px 0 32px;"><div style="border-top:1px solid #eeeeee;"></div></td></tr>
+
+{# ── SECTION 2: INCIDENTS THAT MATTERED ──────────────────── #}
+<tr>
+<td style="padding:20px 32px 0 32px;">
+  <div style="font-size:11px;font-weight:700;color:#F96302;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px;">Incidents that mattered</div>
+
+  {% for inc in a.major_incidents[:5] %}
+  {% set border_color = "#C62828" if inc.priority in ("P1", "SEV1") else "#F96302" %}
+  {% set bg_color = "#fdf2f2" if inc.priority in ("P1", "SEV1") else "#FEF3EB" %}
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;border-left:3px solid {{ border_color }};background-color:{{ bg_color }};border-radius:0 6px 6px 0;">
+  <tr><td style="padding:12px 14px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td>
+        <span style="font-size:10px;font-weight:700;color:#ffffff;background-color:{{ border_color }};padding:2px 6px;border-radius:3px;">{{ inc.priority }}</span>
+        <span style="font-size:10px;color:#5b5e5e;margin-left:6px;">{{ inc.created_at[:16] }} UTC</span>
+      </td>
+      <td align="right">
+        <span style="font-size:11px;font-weight:600;color:#232525;font-family:monospace;">{{ inc.duration }} to resolve</span>
+      </td>
+    </tr>
+    </table>
+    <div style="font-size:13px;font-weight:500;color:#232525;margin-top:6px;">{{ inc.description }}</div>
+    <div style="font-size:11px;color:#5b5e5e;margin-top:3px;">{{ inc.service_name }} &middot; {{ inc.escalation_count }} escalation{{ "s" if inc.escalation_count != 1 }} &middot; {{ inc.engaged_user_count }} responder{{ "s" if inc.engaged_user_count != 1 }}{% if inc.is_sleep_hour %} &middot; occurred during sleep hours{% endif %}</div>
+  </td></tr>
+  </table>
+  {% endfor %}
+
+  {# Noisiest services table #}
+  {% if a.top_services %}
+  <div style="font-size:11px;font-weight:700;color:#F96302;text-transform:uppercase;letter-spacing:0.8px;margin:18px 0 10px 0;">Noisiest services this week</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:12px;border:1px solid #dddddd;border-radius:6px;overflow:hidden;">
+  <tr style="background-color:#232525;">
+    <td style="padding:8px 12px;font-weight:600;color:#ffffff;font-size:10px;text-transform:uppercase;letter-spacing:0.3px;">Service</td>
+    <td align="center" style="padding:8px 8px;font-weight:600;color:#ffffff;font-size:10px;text-transform:uppercase;">Incidents</td>
+    <td align="center" style="padding:8px 8px;font-weight:600;color:#ffffff;font-size:10px;text-transform:uppercase;">MTTR</td>
+    <td align="center" style="padding:8px 8px;font-weight:600;color:#ffffff;font-size:10px;text-transform:uppercase;">Escalations</td>
+    <td align="center" style="padding:8px 8px;font-weight:600;color:#ffffff;font-size:10px;text-transform:uppercase;">Uptime</td>
+  </tr>
+  {% for svc in a.top_services[:5] %}
+  <tr style="border-top:1px solid #eeeeee;{% if loop.index is odd %}background-color:#f5f5f5;{% endif %}">
+    <td style="padding:8px 12px;font-weight:500;color:#232525;">{{ svc.service_name }}</td>
+    <td align="center" style="padding:8px 8px;font-family:monospace;">{{ svc.incident_count }}</td>
+    <td align="center" style="padding:8px 8px;font-family:monospace;color:{{ mttr_color(svc.mttr_seconds) }};">{{ svc.mttr }}</td>
+    <td align="center" style="padding:8px 8px;">{{ svc.escalation_count }}</td>
+    <td align="center" style="padding:8px 8px;font-family:monospace;color:{{ uptime_color(svc.uptime_raw) }};">{{ svc.uptime_pct }}</td>
+  </tr>
+  {% endfor %}
+  </table>
+  {% endif %}
+
+  {# Quick stats row #}
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px;">
+  <tr>
+    <td width="33%" style="padding-right:6px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#FEF3EB;border:1px solid #FDCFAA;border-radius:6px;text-align:center;">
+      <tr><td style="padding:10px 8px;">
+        <div style="font-size:10px;font-weight:600;color:#F96302;text-transform:uppercase;">High severity</div>
+        {% set high_count = (a.priority_breakdown.get("P1", 0) + a.priority_breakdown.get("P2", 0) + a.priority_breakdown.get("SEV1", 0) + a.priority_breakdown.get("SEV2", 0)) %}
+        <div style="font-size:20px;font-weight:800;color:#C62828;margin-top:2px;">{{ high_count }}</div>
+        {% set total = a.kpis[0].raw_value|int if a.kpis else 0 %}
+        <div style="font-size:10px;color:#999999;">of {{ total }} total</div>
+      </td></tr>
+      </table>
+    </td>
+    <td width="33%" style="padding:0 3px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f5;border:1px solid #dddddd;border-radius:6px;text-align:center;">
+      <tr><td style="padding:10px 8px;">
+        <div style="font-size:10px;font-weight:600;color:#5b5e5e;text-transform:uppercase;">Auto-resolved</div>
+        <div style="font-size:20px;font-weight:800;color:#5b5e5e;margin-top:2px;">{{ a.auto_resolved_pct }}%</div>
+        <div style="font-size:10px;color:#999999;">{{ a.auto_resolved_count }} of {{ total }}</div>
+      </td></tr>
+      </table>
+    </td>
+    <td width="33%" style="padding-left:6px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f5;border:1px solid #dddddd;border-radius:6px;text-align:center;">
+      <tr><td style="padding:10px 8px;">
+        <div style="font-size:10px;font-weight:600;color:#5b5e5e;text-transform:uppercase;">Ack rate</div>
+        <div style="font-size:20px;font-weight:800;color:#2E7D32;margin-top:2px;">{{ a.ack_rate }}%</div>
+      </td></tr>
+      </table>
+    </td>
+  </tr>
+  </table>
+</td>
+</tr>
+
+<tr><td style="padding:20px 32px 0 32px;"><div style="border-top:1px solid #eeeeee;"></div></td></tr>
+
+{# ── SECTION 3: ON-CALL HEALTH ───────────────────────────── #}
+<tr>
+<td style="padding:20px 32px 0 32px;">
+  <div style="font-size:11px;font-weight:700;color:#F96302;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px;">On-call health</div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:14px;">
+  <tr>
+    <td width="33%" style="padding-right:6px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #dddddd;border-radius:6px;text-align:center;">
+      <tr><td style="padding:12px 8px;">
+        <div style="font-size:10px;font-weight:600;color:#F96302;text-transform:uppercase;">Business hours</div>
+        <div style="font-size:24px;font-weight:800;color:#F96302;margin-top:2px;">{{ a.business_hour_interruptions }}</div>
+        <div style="font-size:10px;color:#999999;">8am-6pm weekdays</div>
+      </td></tr>
+      </table>
+    </td>
+    <td width="33%" style="padding:0 3px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #dddddd;border-radius:6px;text-align:center;">
+      <tr><td style="padding:12px 8px;">
+        <div style="font-size:10px;font-weight:600;color:#F57C00;text-transform:uppercase;">Off hours</div>
+        <div style="font-size:24px;font-weight:800;color:#F57C00;margin-top:2px;">{{ a.off_hour_interruptions }}</div>
+        <div style="font-size:10px;color:#999999;">6pm-10pm + weekends</div>
+      </td></tr>
+      </table>
+    </td>
+    <td width="33%" style="padding-left:6px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #dddddd;border-radius:6px;text-align:center;">
+      <tr><td style="padding:12px 8px;">
+        <div style="font-size:10px;font-weight:600;color:#C62828;text-transform:uppercase;">Sleep hours</div>
+        <div style="font-size:24px;font-weight:800;color:#C62828;margin-top:2px;">{{ a.sleep_hour_interruptions }}</div>
+        <div style="font-size:10px;color:#999999;">10pm-8am daily</div>
+      </td></tr>
+      </table>
+    </td>
+  </tr>
+  </table>
+
+  {% if insights.escalation_watch %}
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#FEF3EB;border:1px solid #FDCFAA;border-radius:6px;margin-bottom:14px;">
+  <tr><td style="padding:12px 14px;font-size:12px;color:#5b5e5e;line-height:1.5;">
+    <span style="font-weight:700;color:#F96302;">Escalation watch:</span> {{ insights.escalation_watch }}
+  </td></tr>
+  </table>
+  {% endif %}
+
+  {# Response time percentile table #}
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:12px;border:1px solid #dddddd;border-radius:6px;overflow:hidden;">
+  <tr style="background-color:#232525;">
+    <td style="padding:8px 12px;font-weight:600;color:#ffffff;font-size:10px;text-transform:uppercase;">Metric</td>
+    <td align="center" style="padding:8px 8px;font-weight:600;color:#ffffff;font-size:10px;text-transform:uppercase;">p50</td>
+    <td align="center" style="padding:8px 8px;font-weight:600;color:#ffffff;font-size:10px;text-transform:uppercase;">p75</td>
+    <td align="center" style="padding:8px 8px;font-weight:600;color:#ffffff;font-size:10px;text-transform:uppercase;">p90</td>
+    <td align="center" style="padding:8px 8px;font-weight:600;color:#ffffff;font-size:10px;text-transform:uppercase;">p95</td>
+  </tr>
+  <tr style="border-top:1px solid #eeeeee;">
+    <td style="padding:8px 12px;font-weight:500;color:#232525;">Time to ack</td>
+    <td align="center" style="padding:8px 8px;font-family:monospace;color:#2E7D32;">{{ a.mtta_p50 }}</td>
+    <td align="center" style="padding:8px 8px;font-family:monospace;color:#232525;">{{ a.mtta_p75 }}</td>
+    <td align="center" style="padding:8px 8px;font-family:monospace;color:#F57C00;">{{ a.mtta_p90 }}</td>
+    <td align="center" style="padding:8px 8px;font-family:monospace;color:#C62828;">{{ a.mtta_p95 }}</td>
+  </tr>
+  <tr style="border-top:1px solid #eeeeee;background-color:#f5f5f5;">
+    <td style="padding:8px 12px;font-weight:500;color:#232525;">Time to resolve</td>
+    <td align="center" style="padding:8px 8px;font-family:monospace;color:#2E7D32;">{{ a.mttr_p50 }}</td>
+    <td align="center" style="padding:8px 8px;font-family:monospace;color:#232525;">{{ a.mttr_p75 }}</td>
+    <td align="center" style="padding:8px 8px;font-family:monospace;color:#F57C00;">{{ a.mttr_p90 }}</td>
+    <td align="center" style="padding:8px 8px;font-family:monospace;color:#C62828;">{{ a.mttr_p95 }}</td>
+  </tr>
+  </table>
+
+  {% if insights.oncall_health_paragraph %}
+  <div style="margin-top:14px;font-size:13px;color:#5b5e5e;line-height:1.6;">{{ insights.oncall_health_paragraph }}</div>
+  {% endif %}
+</td>
+</tr>
+
+<tr><td style="padding:20px 32px 0 32px;"><div style="border-top:1px solid #eeeeee;"></div></td></tr>
+
+{# ── SECTION 4: TAKEAWAYS ────────────────────────────────── #}
+{% if insights.takeaways %}
+<tr>
+<td style="padding:20px 32px 0 32px;">
+  <div style="font-size:11px;font-weight:700;color:#F96302;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px;">What to pay attention to next week</div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+  {% for t in insights.takeaways %}
+  <tr>
+    <td valign="top" width="24" style="padding:0 10px 12px 0;">
+      {% if t.severity == "green" %}
+      <div style="width:22px;height:22px;border-radius:50%;background-color:#2E7D32;color:#ffffff;font-size:13px;font-weight:700;text-align:center;line-height:22px;">&check;</div>
+      {% else %}
+      <div style="width:22px;height:22px;border-radius:50%;background-color:{{ t.severity|severity_color }};color:#ffffff;font-size:11px;font-weight:700;text-align:center;line-height:22px;">{{ t.number }}</div>
+      {% endif %}
+    </td>
+    <td style="padding-bottom:12px;font-size:13px;color:#5b5e5e;line-height:1.5;">
+      <span style="font-weight:600;color:#232525;">{{ t.title }}</span> {{ t.body }}
+    </td>
+  </tr>
+  {% endfor %}
+  </table>
+</td>
+</tr>
+{% endif %}
+
+{# ── FOOTER ──────────────────────────────────────────────── #}
+<tr>
+<td style="padding:28px 32px;">
+  <div style="border-top:2px solid #F96302;padding-top:16px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="font-size:11px;color:#999999;line-height:1.5;">
+        Generated from PagerDuty Analytics API<br>
+        pagerduty-reliability-agent v1.0
+      </td>
+      <td align="right" valign="top" style="font-size:11px;color:#999999;">
+        {{ a.week_start }} - {{ a.week_end }}<br>
+        {% if team_name %}{{ team_name }}{% endif %}
+      </td>
+    </tr>
+    </table>
+  </div>
+</td>
+</tr>
+
+</table>
+</td></tr>
+</table>
+
+</body>
+</html>
