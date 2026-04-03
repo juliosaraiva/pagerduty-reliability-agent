@@ -1,0 +1,16 @@
+external_docs: []
+
+tool_commands:
+  test: "pytest tests/ --cov=reliability_agent --cov-report=xml"
+  lint: "ruff check ."
+  format: "ruff format ."
+  sast: null
+  build: "pip install -e .[dev]"
+
+notes: >
+  .env.example was updated to reflect the GitHub Copilot SDK backend (GITHUB_TOKEN / COPILOT_MODEL)
+  instead of the previously referenced Anthropic keys (ANTHROPIC_API_KEY / ANTHROPIC_MODEL).
+  The canonical AI backend is GitHub Copilot SDK — no Anthropic dependency.
+  PagerDuty API reference: https://developer.pagerduty.com/api-reference/
+  GitHub Copilot SDK reference: search the web as no external docs provided.
+  Specs live in specs/ (local markdown, default).

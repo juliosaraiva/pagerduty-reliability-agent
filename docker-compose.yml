@@ -1,0 +1,17 @@
+services:
+  reliability-agent:
+    build: .
+    environment:
+      - PAGERDUTY_API_KEY
+      - GITHUB_TOKEN
+      - COPILOT_MODEL=${COPILOT_MODEL:-claude-sonnet-4-6}
+      - REPORT_TIMEZONE=${REPORT_TIMEZONE:-UTC}
+      - SMTP_HOST
+      - SMTP_PORT
+      - SMTP_USER
+      - SMTP_PASSWORD
+      - REPORT_FROM_ADDRESS
+      - REPORT_TO_ADDRESSES
+    volumes:
+      - ./reports:/app/reports
+    command: ["generate", "--output", "reports/weekly-digest.html"]

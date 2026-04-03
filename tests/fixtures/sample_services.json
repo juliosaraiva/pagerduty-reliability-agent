@@ -1,0 +1,26 @@
+[
+  {
+    "service_name": "api-gateway",
+    "total_incident_count": 15,
+    "mean_seconds_to_resolve": 2400,
+    "total_escalation_count": 4,
+    "up_time_pct": 99.75,
+    "total_sleep_hour_interruptions": 3
+  },
+  {
+    "service_name": "checkout-service",
+    "total_incident_count": 10,
+    "mean_seconds_to_resolve": 1200,
+    "total_escalation_count": 2,
+    "up_time_pct": 99.90,
+    "total_sleep_hour_interruptions": 1
+  },
+  {
+    "service_name": "load-balancer",
+    "total_incident_count": 5,
+    "mean_seconds_to_resolve": 600,
+    "total_escalation_count": 0,
+    "up_time_pct": 99.99,
+    "total_sleep_hour_interruptions": 0
+  }
+]
